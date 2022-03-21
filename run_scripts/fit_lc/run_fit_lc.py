@@ -1,9 +1,10 @@
 from optparse import OptionParser
-from ztf_fit import SN_fit_tab
-from ztf_hdf5 import Read_LightCurve
+from ztf_simfit.ztf_simfit.ztf_fit import SN_fit_tab
+from ztf_pipeutils.ztf_pipeutils.ztf_hdf5 import Read_LightCurve
 import astropy
-from ztf_util import multiproc, dump_in_yaml, checkDir
-from ztf_util import make_dict_from_config, make_dict_from_optparse
+from ztf_pipeutils.ztf_pipeutils.ztf_util import multiproc, dump_in_yaml, checkDir
+from ztf_pipeutils.ztf_pipeutils.ztf_util import make_dict_from_config, make_dict_from_optparse
+import ztf_simfit as fit_input
 
 
 def fit(metaTable, params={}, j=0, output_q=None):
@@ -38,9 +39,8 @@ def fit(metaTable, params={}, j=0, output_q=None):
 
 
 # get all possible simulation parameters and put in a dict
-# path = simu_fit.__path__
-confDict = make_dict_from_config(
-    'ztf_stage/script/fit_lc', 'config_fit_lc.txt')
+path = fit_input.__path__
+confDict = make_dict_from_config(path[0], 'script_input/config_fit_lc.txt')
 
 parser = OptionParser()
 # parser : 'dynamical' generation
