@@ -1,6 +1,7 @@
 import os
-from ztf_util import make_dict_from_config, make_dict_from_optparse
+from ztf_pipeutils.ztf_pipeutils.ztf_util import make_dict_from_config, make_dict_from_optparse
 from optparse import OptionParser, OptionGroup
+import ztf_simfit as script_input
 
 
 def cmd(script, confDict):
@@ -25,22 +26,20 @@ def fill_grp(group, confDict):
 parser = OptionParser()
 
 # parser for simulation
-confDict_simu = make_dict_from_config(
-    'ztf_stage/script/simu', 'config_simu.txt')
+path = script_input.__path__
+confDict_simu = make_dict_from_config(path[0], 'script_input/config_simu.txt')
 group_simu = OptionGroup(parser, "Simulation")
 parser.add_option_group(group_simu)
 fill_grp(group_simu, confDict_simu)
 
 # parser for info
-confDict_info = make_dict_from_config(
-    'ztf_stage/script/info', 'config_info.txt')
+confDict_info = make_dict_from_config(path[0], 'script_input/config_info.txt')
 group_info = OptionGroup(parser, "Info")
 parser.add_option_group(group_info)
 fill_grp(group_info, confDict_info)
 
 # parser for fit
-confDict_fit = make_dict_from_config(
-    'ztf_stage/script/fit_lc', 'config_fit_lc.txt')
+confDict_fit = make_dict_from_config(path[0], 'script_input/config_fit_lc.txt')
 group_fit = OptionGroup(parser, "Fit LC")
 parser.add_option_group(group_fit)
 fill_grp(group_fit, confDict_fit)
@@ -51,17 +50,18 @@ opts, args = parser.parse_args()
 # Now run!
 # simulation
 print('Simulation in progress...')
-simu_cmd = cmd('python ztf_stage/script/simu/run_simulation.py', confDict_simu)
+simu_cmd = cmd(
+    'python run_scripts/simulation/run_simulation.py', confDict_simu)
 os.system(simu_cmd)
 
 # info
 print('Info in progress...')
-info_cmd = cmd('python ztf_stage/script/info/run_info.py', confDict_info)
+info_cmd = cmd('python run_scripts/info/run_info.py', confDict_info)
 os.system(info_cmd)
 
 # fit lc
 print('Fit LC in progress...')
-fit_cmd = cmd('python ztf_stage/script/fit_lc/run_fit_lc.py', confDict_fit)
+fit_cmd = cmd('python run_scripts/fit_lc/run_fit_lc.py', confDict_fit)
 os.system(fit_cmd)
 
 
