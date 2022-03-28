@@ -1,7 +1,7 @@
 import os
-from ztf_pipeutils.ztf_pipeutils.ztf_util import make_dict_from_config, make_dict_from_optparse
+from ztf_pipeutils.ztf_util import make_dict_from_config, make_dict_from_optparse
 from optparse import OptionParser, OptionGroup
-import ztf_simfit as script_input
+import ztf_simfit_input as simfit_input
 
 
 def cmd(script, confDict):
@@ -26,20 +26,20 @@ def fill_grp(group, confDict):
 parser = OptionParser()
 
 # parser for simulation
-path = script_input.__path__
-confDict_simu = make_dict_from_config(path[0], 'script_input/config_simu.txt')
+path = list(simfit_input.__path__)
+confDict_simu = make_dict_from_config(path[0], 'config_simu.txt')
 group_simu = OptionGroup(parser, "Simulation")
 parser.add_option_group(group_simu)
 fill_grp(group_simu, confDict_simu)
 
 # parser for info
-confDict_info = make_dict_from_config(path[0], 'script_input/config_info.txt')
+confDict_info = make_dict_from_config(path[0], 'config_info.txt')
 group_info = OptionGroup(parser, "Info")
 parser.add_option_group(group_info)
 fill_grp(group_info, confDict_info)
 
 # parser for fit
-confDict_fit = make_dict_from_config(path[0], 'script_input/config_fit_lc.txt')
+confDict_fit = make_dict_from_config(path[0], 'config_fit_lc.txt')
 group_fit = OptionGroup(parser, "Fit LC")
 parser.add_option_group(group_fit)
 fill_grp(group_fit, confDict_fit)

@@ -1,12 +1,12 @@
-from ztf_pipeutils.ztf_pipeutils.ztf_util import make_dict_from_config, make_dict_from_optparse
-import ztf_cadence as cadence_input
-from ztf_cadence.ztf_cadence.pixelize import Pixelize_sky
+from ztf_pipeutils.ztf_util import make_dict_from_config, make_dict_from_optparse
+import ztf_cadence_input as cadence_input
+from ztf_cadence.pixelize import Pixelize_sky
 from optparse import OptionParser
 import pandas as pd
 
 # get all possible simulation parameters and put in a dict
-path = cadence_input.__path__
-confDict = make_dict_from_config(path[0], 'script_input/config_pixelize.txt')
+path = list(cadence_input.__path__)
+confDict = make_dict_from_config(path[0], 'config_pixelize.txt')
 
 parser = OptionParser()
 # parser : 'dynamical' generation

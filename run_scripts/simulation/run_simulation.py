@@ -1,10 +1,10 @@
 from optparse import OptionParser
-from ztf_pipeutils.ztf_pipeutils.ztf_util import make_dict_from_config, make_dict_from_optparse
-from ztf_simfit.ztf_simfit.ztf_simu import Simul_lc
-from ztf_pipeutils.ztf_pipeutils.ztf_hdf5 import Write_LightCurve
-from ztf_pipeutils.ztf_pipeutils.ztf_util import multiproc, dump_in_yaml, checkDir
+from ztf_pipeutils.ztf_util import make_dict_from_config, make_dict_from_optparse
+from ztf_simfit.ztf_simu import Simul_lc
+from ztf_pipeutils.ztf_hdf5 import Write_LightCurve
+from ztf_pipeutils.ztf_util import multiproc, dump_in_yaml, checkDir
 from astropy.table import Table, vstack
-import ztf_simfit as simu_input
+import ztf_simfit_input as simfit_input
 
 
 def simu(index, params, j=0, output_q=None):
@@ -21,8 +21,8 @@ def simu(index, params, j=0, output_q=None):
 
 
 # get all possible simulation parameters and put in a dict
-path = simu_input.__path__
-confDict = make_dict_from_config(path[0], 'script_input/config_simu.txt')
+path = list(simfit_input.__path__)
+confDict = make_dict_from_config(path[0], 'config_simu.txt')
 
 parser = OptionParser()
 # parser : 'dynamical' generation

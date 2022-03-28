@@ -1,13 +1,13 @@
 from optparse import OptionParser
-from ztf_simfit.ztf_simfit.ztf_info import get_selec, Info
-from ztf_pipeutils.ztf_pipeutils.ztf_util import make_dict_from_config, make_dict_from_optparse
-from ztf_pipeutils.ztf_pipeutils.ztf_util import dump_in_yaml, checkDir
+from ztf_simfit.ztf_info import get_selec, Info
+from ztf_pipeutils.ztf_util import make_dict_from_config, make_dict_from_optparse
+from ztf_pipeutils.ztf_util import dump_in_yaml, checkDir
 import astropy
-import ztf_simfit as simu_input
+import ztf_simfit_input as simfit_input
 
 # get all possible parameters and put in a dict
-path = simu_input.__path__
-confDict = make_dict_from_config(path[0], 'script_input/config_info.txt')
+path = list(simfit_input.__path__)
+confDict = make_dict_from_config(path[0], 'config_info.txt')
 
 parser = OptionParser()
 # parser : 'dynamical' generation
