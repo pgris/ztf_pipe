@@ -71,20 +71,27 @@ logObs = params['logObs']
 print('loading', logObs)
 df_obs = pd.read_csv(logObs)
 
-# first thing to do : re-align quadrant centers
-pp = {}
-pp['obs'] = df_obs
+# re-align quadrant centers - if requested
 
+if opts.alignquads:
 
-# align quadrants
-df_obs_quad = multiproc(df_obs['field'].unique(), pp, align_quad, opts.nproc)
+    pp = {}
+    pp['obs'] = df_obs
+    # align quadrants
+    df_obs = multiproc(df_obs['field'].unique(), pp, align_quad, opts.nproc)
+    print('aligned', len(df_obs))
 
 params = {}
 params['nside'] = opts.nside
-params['raCol'] = 'ra_quad'
-params['decCol'] = 'dec_quad'
+params['raCol'] = 'ra'
+params['decCol'] = 'dec'
+
+if opts.alignquads:
+    params['raCol'] = 'ra_quad'
+    params['decCol'] = 'dec_quad'
+
 
 # pixelize the data
-dfOut = multiproc(df_obs_quad[:90000], params, multipix, opts.nproc)
+dfOut = multiproc(df_obs, params, multipix, opts.nproc)
 
 dfOut.to_hdf(opts.outFile, key='obs')
