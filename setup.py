@@ -46,7 +46,7 @@ class InstallCommand(install):
                 # get the version for this package
                 idx = self.packs['packname'] == self.package
                 version = self.packs[idx]['version'].item()
-                cmd = 'pip install -v --user git+https://github.com/lsstdesc/{}.git@{}'.format(
+                cmd = 'pip install -v --user git+https://github.com/pgris/{}.git@{}'.format(
                     self.package, version)
                 os.system(cmd)
             else:
@@ -54,7 +54,7 @@ class InstallCommand(install):
                     # get the version for this package
                     packname = pack['packname']
                     version = pack['version']
-                    cmd = 'pip install --user git+https://github.com/lsstdesc/{}.git@{}'.format(
+                    cmd = 'pip install --user git+https://github.com/pgris/{}.git@{}'.format(
                         packname, version)
                     os.system(cmd)
 
