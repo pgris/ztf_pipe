@@ -80,7 +80,7 @@ if opts.alignquads:
     # align quadrants
     df_obs = multiproc(df_obs['field'].unique(), pp, align_quad, opts.nproc)
     print('aligned', len(df_obs))
-
+    df_obs = df_obs.sort_values(by=['time'])
 params = {}
 params['nside'] = opts.nside
 params['raCol'] = 'ra'
