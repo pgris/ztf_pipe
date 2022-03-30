@@ -68,10 +68,10 @@ with open("version.py") as fp:
     exec(fp.read(), pkg_vars)
 
 setup(
-    name='sn_pipe',
+    name='ztf_pipe',
     version=pkg_vars['__version__'],
-    description='A framework to run the Survey Strategy Support pipeline for supernovae',
-    url='http://github.com/lsstdesc/sn_pipe',
+    description='A framework to run ZTF simulations for supernovae',
+    url='http://github.com/pgris/ztf_pipe',
     author='Philippe Gris',
     author_email='philippe.gris@clermont.in2p3.fr',
     license='BSD',
