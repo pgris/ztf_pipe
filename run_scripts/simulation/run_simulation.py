@@ -45,6 +45,11 @@ for key, vals in confDict.items():
     params[key] = newval
 print(params)
 
+if params['ztfdataDir'] == 'default':
+    import ztf_data as ztf_data
+    path = list(ztf_data.__path__)
+    params['ztfdataDir'] = path[0]
+
 ntransient = params['ntransient']
 nproc = params['nprocSimu']
 params['z_range'] = (params['zmin'], params['zmax'])
