@@ -192,15 +192,16 @@ def multipixel_obs(ppix, params={}, j=0, output_q=None):
                     width_dec, raCol=raCol, decCol=decCol)
     import time
     dtot = pd.DataFrame()
-    time_ref = time.time()
+    time_ref_tot = time.time()
     for ih, healpix in enumerate(ppix):
+        time_ref = time.time()
         dp = ppo(healpix)
         dtot = pd.concat((dtot, dp))
 
-        if ih % 10 == 0:
-            print('processed', ih, time.time()-time_ref)
+        if ih % 1000 == 0:
+            print('processed', ih, time.time()-time_ref_tot)
 
-    print('pproc', time.time()-time_ref)
+    print('pproc', time.time()-time_ref_tot)
 
     if output_q is not None:
         return output_q.put({j: dtot})
@@ -264,7 +265,6 @@ ra_min = opts.RAmin
 ra_max = opts.RAmax
 dec_min = opts.Decmin
 dec_max = opts.Decmax
-delta_ra = ra_max-ra_min
 
 width_ra = opts.width_RA
 width_dec = opts.width_Dec
@@ -291,11 +291,19 @@ print(ppix, len(ppix))
 # from pixels -> obs
 # get pixels in this window
 """
+delta_ra = ra_max-ra_min
+delta_dec = dec_max-dec_min
+
 ppix = pixels(opts.nside, np.mean([ra_min, ra_max]), np.mean(
     [dec_min, dec_max]), delta_ra, delta_dec)
 
+raCol = 'ra'
+decCol = 'dec'
+if opts.alignquads:
+    raCol = 'ra_quad'
+    decCol = 'dec_quad'
 df = pixel_to_obs(ppix, opts.nside, df_obs, width_ra,
-                  width_dec, 'ra_quad', 'dec_quad', opts.nproc)
+                  width_dec, raCol, decCol, opts.nproc)
 """
 
 # from obs -> pixels
