@@ -36,7 +36,7 @@ class InstallCommand(install):
 
     def run(self):
         # install dependencies first
-        if self.package == 'ztf_pipe':
+        if self.package == 'ztf_simpipe':
             cmd = 'pip install --user -r requirements.txt --no-deps'
             os.system(cmd)
 
@@ -68,12 +68,12 @@ with open("version.py") as fp:
     exec(fp.read(), pkg_vars)
 
 setup(
-    name='ztf_pipe',
+    name='ztf_simpipe',
     version=pkg_vars['__version__'],
     description='A framework to run ZTF simulations for supernovae',
     url='http://github.com/pgris/ztf_pipe',
-    author='Philippe Gris',
-    author_email='philippe.gris@clermont.in2p3.fr',
+    author='Manon Bailleul, Philippe Gris',
+    author_email='manon.bailleul@etu.uca.fr,philippe.gris@clermont.in2p3.fr',
     license='BSD',
     python_requires='>=3.5',
     zip_safe=False,

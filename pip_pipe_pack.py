@@ -53,7 +53,7 @@ def cmd_install(package, verbose, available_packs):
       cmd to apply
     """
 
-    if package not in available_packs['packname'].tolist() and package != 'ztf_pipe' and package != 'all':
+    if package not in available_packs['packname'].tolist() and package != 'ztf_simpipe' and package != 'all':
         print('The package you are trying to install does not exist')
         print('The list of available packages is ',
               available_packs['packname'].tolist())
