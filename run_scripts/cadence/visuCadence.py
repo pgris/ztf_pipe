@@ -4,43 +4,7 @@ from ztf_pipeutils.ztf_util import make_dict_from_config
 from ztf_cadence.plot_cadence import PlotNights
 from optparse import OptionParser
 import pandas as pd
-import healpy as hp
-
-
-def multipix(data, params={}, j=0, output_q=None):
-    """
-    Function to perfom sky pixelizing
-    with the possibility to use multiprocessing
-
-    Parameters
-    ----------------
-    data : astropy table
-       array of data to process
-    params: dict
-      parameters of the function
-    j: int, opt
-      tag for multiprocessing (default: 0)
-    output_q: multiprocessing.queue,opt
-      queue for multiprocessing
-
-    Returns
-    ----------
-    resfit: astropy table
-      result of the fit
-    """
-    pixelize_it = Pixelize_sky(
-        params['nside'], raCol=params['raCol'], decCol=params['decCol'])
-
-    # now process
-
-    print('processing', j, len(data))
-    dfOut = pixelize_it(data)
-
-    if output_q is not None:
-        return output_q.put({j: dfOut})
-    else:
-        return 0
-
+import glob
 
 # get all possible simulation parameters and put in a dict
 path = list(cadence_input.__path__)
@@ -67,8 +31,15 @@ print(params)
 
 # load observations
 
-df = pd.read_hdf(opts.obsFile)
+#df = pd.read_hdf(opts.obsFile)
 
-plot_nights = PlotNights(df, opts.nside, opts.outDir)
+fis = glob.glob('../pixelized_newformat/*.hdf5')
+
+df = pd.DataFrame()
+for fi in fis:
+    dd = pd.read_hdf(fi)
+    df = pd.concat((df, dd))
+
+plot_nights = PlotNights(df, opts.nside, opts.outDir, opts.nproc)
 
 plot_nights(opts.displaytype)
