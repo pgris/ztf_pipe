@@ -3,7 +3,7 @@ from ztf_pipeutils.ztf_util import make_dict_from_config, make_dict_from_optpars
 import ztf_cadence_input as cadence_input
 from ztf_cadence.pixelize import Pixelize_sky, pixels, Pixel2Obs
 from ztf_cadence.align_quadrant import align_quad
-from ztf_pipeutils.ztf_util import multiproc,checkDir
+from ztf_pipeutils.ztf_util import multiproc, checkDir
 from optparse import OptionParser
 import pandas as pd
 import numpy as np
@@ -14,7 +14,7 @@ import time
 def sel_obs_sky(df_obs,
                 ra_min, ra_max, dec_min, dec_max,
                 width_ra, width_dec,
-                raCol='ra', decCol='dec', k=1.05):
+                raCol='ra', decCol='dec', k=1.20):
     """
     Method to select observations on a sky patch
     It is mandatory to extand the area defined by (ra_min,ra_max,dec_min,dec_max)
@@ -86,6 +86,7 @@ def obs_to_pixel(df_obs, nside, nproc, alignquads):
     #dfOut.to_hdf(opts.outFile, key='obs')
     #dfOut.to_parquet('df.parquet.gzip', compression='gzip')
     return dfOut
+
 
 def multiobs_pixel(data, params={}, j=0, output_q=None):
     """
@@ -309,8 +310,8 @@ df = pixel_to_obs(ppix, opts.nside, df_obs, width_ra,
 # from obs -> pixels
 dfOut = obs_to_pixel(df_obs, opts.nside, opts.nproc, opts.alignquads)
 
-#create outputDir if necessary
+# create outputDir if necessary
 checkDir(opts.outDir)
-outName = '{}/{}'.format(opts.outDir,opts.outFile)
+outName = '{}/{}'.format(opts.outDir, opts.outFile)
 
 dfOut.to_hdf(outName, key='obs')
