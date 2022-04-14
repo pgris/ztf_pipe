@@ -29,7 +29,7 @@ nproc = opts.nproc
 
 df = pd.read_hdf('{}/{}'.format(input_dir, fileName))
 
-resdf = processMetric_multiproc(metric_name, df[:10000], nproc)
+resdf = processMetric_multiproc(metric_name, df, nproc)
 
 checkDir(output_dir)
 fName = '{}/{}'.format(output_dir, outName)
