@@ -1,2 +1,4 @@
+###### Requirements without Version Specifiers ######
+dustmaps
 # github packages
 git+https://github.com/pgris/ztf_pipeutils.git@dev#egg=ztf_pipeutils
