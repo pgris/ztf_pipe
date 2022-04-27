@@ -5,15 +5,24 @@ from ztf_pipeutils.ztf_hdf5 import Write_LightCurve
 from ztf_pipeutils.ztf_util import multiproc, dump_in_yaml, checkDir
 from astropy.table import Table, vstack
 import ztf_simfit_input as simfit_input
+import os
+import pathlib
+import pandas as pd
 
 
 def simu(index, params, j=0, output_q=None):
 
     params['ntransient'] = index[0]
     params['seed'] += j
-
+    obs = params['obs']
+    ra_range = params['ra_range']
+    dec_range = params['dec_range']
+    del params['ra_range']
+    del params['dec_range']
+    del params['obs']
     # lc simulation
-    lc = Simul_lc(**params)()
+    simulc = Simul_lc(**params)
+    lc = simulc(obs, ra_range, dec_range)
     if output_q is not None:
         return output_q.put({j: lc})
     else:
@@ -59,6 +68,15 @@ outputDir = params['outputDirSimu']
 lcName = params['lcName']
 metaName = params['metaName']
 path_prefix = params['path_prefix']
+
+# load observations
+obsPath = os.path.join(params['obsDir'], params['obsFile'])
+file_extension = pathlib.Path(obsPath).suffix
+if file_extension == '.csv':
+    obs = pd.read_csv(obsPath)
+if file_extension == '.hdf5':
+    obs = pd.read_hdf(obsPath)
+params['obs'] = obs
 
 # dump script parameters in yaml file
 checkDir(outputDir)
