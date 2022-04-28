@@ -23,8 +23,10 @@ def simu(index, params, j=0, output_q=None):
     # lc simulation
     simulc = Simul_lc(**params)
     lc = simulc(obs, ra_range, dec_range)
+    metadata = lc.meta
+    meta_rej = lc.meta_rejected
     if output_q is not None:
-        return output_q.put({j: lc})
+        return output_q.put({j: ([lc], [metadata], [meta_rej])})
     else:
         return 0
 
@@ -92,6 +94,22 @@ if __name__ == '__main__':
     Write = Write_LightCurve(
         outputDir=outputDir, file_data=lcName, file_meta=metaName, path_prefix=path_prefix)
     rlc = []
+    rmeta = []
+    rmeta_rej = []
+    for i, lcl in lc_dict.items():
+        for ll in lcl[0]:
+            rlc.append(ll)
+        for ll in lcl[1]:
+            rmeta.append(ll)
+        for ll in lcl[2]:
+            rmeta_rej.append(ll)
+
+    data = Write.write_data(rlc, rmeta, rmeta_rej)
+
+    """
+    Write = Write_LightCurve(
+        outputDir=outputDir, file_data=lcName, file_meta=metaName, path_prefix=path_prefix)
+    rlc = []
     meta_rejected = Table()
     for i, lcl in lc_dict.items():
         if lcl.meta_rejected is not None:
@@ -100,3 +118,4 @@ if __name__ == '__main__':
             rlc.append(lc)
 
     data = Write.write_data(rlc, meta_rejected)
+    """

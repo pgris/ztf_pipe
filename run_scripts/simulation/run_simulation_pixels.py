@@ -9,6 +9,7 @@ import os
 import copy
 import numpy as np
 import numpy.lib.recfunctions as rf
+import operator as op
 
 
 def loadData(theDir, theFile):
@@ -36,6 +37,125 @@ def loadData(theDir, theFile):
 
 
 def simu(hpixels, params, j=0, output_q=None):
+    """
+    method to perform simulations on multiple healpixIDs
+
+    Parameters
+    --------------
+    hpixels: array
+      list of (pixnum, season) to simulate
+    params: dict
+      dict of parameters
+    j: int, opt
+      internal tag for multiprocessing (proc number) (default: 0)
+    output_q: multiprocessing queue,opt
+     (default: None)
+
+    Returns
+    -----------
+    liste of (lc,metadata)
+
+    """
+    params['seed'] += j
+    obs = params['obsData']
+    del params['obsData']
+    outputDir = params['outputDirSimu']
+    lcName = params['lcName']
+    metaName = params['metaName']
+    path_prefix = params['path_prefix']
+    cadData = params['cadData']
+    runtype = params['runtype']
+
+    # lc simulation
+    simlc = Simul_lc(**params)
+
+    rlc = []
+    rmeta = []
+    rmeta_rej = []
+    for vv in hpixels:
+        healpixID = vv[0]
+        season = vv[1]
+        lc, metadata, meta_rej = processPixel(
+            obs, simlc, cadData, healpixID, season)
+        if runtype == 'indiv':
+            writeLC(lc, metadata, meta_rej, healpixID, season,
+                    outputDir, lcName, metaName, path_prefix)
+        else:
+            #r.append((lc, metadata, meta_rej))
+            rlc.append(lc)
+            rmeta.append(metadata)
+            rmeta_rej.append(meta_rej)
+
+    if output_q is not None:
+        return output_q.put({j: (rlc, rmeta, rmeta_rej)})
+    else:
+        return 0
+
+
+def processPixel(obs, simlc, cadData, healpixID, season):
+
+    idx = cadData['healpixID'] == healpixID
+    idx &= cadData['season'] == season
+    selcad = cadData[idx]
+    lc = lcPixel(selcad.iloc[0], obs, simlc)
+
+    coldict = dict(zip(['healpixID', 'season'], [healpixID, season]))
+    metadata = None
+    meta_rejected = None
+
+    if lc.meta is not None:
+        metadata = add_cols(lc.meta, coldict)
+
+    if lc.meta_rejected is not None:
+        meta_rejected = add_cols(lc.meta_rejected, coldict)
+
+    return lc, metadata, meta_rejected
+
+
+def writeLC(lc, metadata, meta_rejected, healpixID, season, outputDir, lcName, metaName, path_prefix):
+
+    lcName = lcName.replace(
+        '.hdf5', '_{}_{}.hdf5'.format(healpixID, season))
+    metaName = metaName.replace(
+        '.hdf5', '_{}_{}.hdf5'.format(healpixID, season))
+
+    # write LC and metadata
+    Write = Write_LightCurve(
+        outputDir=outputDir, file_data=lcName, file_meta=metaName, path_prefix=path_prefix)
+
+    path = '_{}_{}'.format(healpixID, season)
+    Write.write_data(lc, metadata, meta_rejected, path=path)
+
+
+def add_cols(arro, dictcol={}):
+
+    arr = np.copy(arro)
+    for key, val in dictcol.items():
+        arr = rf.append_fields(arr, key, [val]*len(arr), usemask=False)
+
+    return arr
+
+
+def simu_deprecated(hpixels, params, j=0, output_q=None):
+    """
+    method to perform simulations on multiple healpixIDs
+
+    Parameters
+    --------------
+    hpixels: array
+      list of (pixnum, season) to simulate
+    params: dict
+      dict of parameters
+    j: int, opt
+      internal tag for multiprocessing (proc number) (default: 0)
+    output_q: multiprocessing queue,opt
+     (default: None)
+
+    Returns
+    -----------
+    liste of (lc,metadata)
+
+    """
 
     hpix = hpixels[0]
     healpixID = hpix[0]
@@ -76,7 +196,7 @@ def simu(hpixels, params, j=0, output_q=None):
         return 0
 
 
-def processPixel(selcad, obsData, simlc):
+def lcPixel(selcad, obsData, simlc):
     """
     Function to process (simul LC on) a pixel
 
@@ -90,7 +210,7 @@ def processPixel(selcad, obsData, simlc):
 
     Returns
     ----------
-
+    lc from simsurvey
 
     """
     hpix = int(selcad['healpixID'])
@@ -166,6 +286,26 @@ params['obsData'] = obsData
 params['cadData'] = cadData
 if __name__ == '__main__':
     ffi = np.unique(cadData[['healpixID', 'season']].to_records(index=False))
-    to = list(map(lambda *x: x, *([iter(ffi)] * nproc)))
-    for tt in to:
-        lc_dict = multiproc(tt, params, simu, nproc, gather=False)
+    if opts.runtype == 'indiv':
+        to = list(map(lambda *x: x, *([iter(ffi)] * nproc)))
+        for tt in to:
+            lc_dict = multiproc(tt, params, simu, nproc, gather=False)
+    else:
+        lc_dict = multiproc(ffi[:16], params, simu, nproc, gather=False)
+
+        # write LC and metadata
+        Write = Write_LightCurve(
+            outputDir=outputDir, file_data=lcName, file_meta=metaName, path_prefix=path_prefix)
+        rlc = []
+        rmeta = []
+        rmeta_rej = []
+        for i, lcl in lc_dict.items():
+            #print('test', list(map(op.itemgetter(1), lcl)))
+            for ll in lcl[0]:
+                rlc.append(ll)
+            for ll in lcl[1]:
+                rmeta.append(ll)
+            for ll in lcl[2]:
+                rmeta_rej.append(ll)
+
+        data = Write.write_data(rlc, rmeta, rmeta_rej)
