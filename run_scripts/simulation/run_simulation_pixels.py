@@ -103,6 +103,9 @@ def processPixel(obs, simlc, cadData, healpixID, season):
     metadata = None
     meta_rejected = None
 
+    if lc is None:
+        return lc, metadata, meta_rejected
+
     if lc.meta is not None:
         metadata = add_cols(lc.meta, coldict)
 
@@ -228,8 +231,11 @@ def lcPixel(selcad, obsData, simlc):
     dec_range = (healpixDec, healpixDec)
     seldata['ra'] = healpixRA
     seldata['dec'] = healpixDec
-    # lc simulation
-    lc = simlc(seldata, ra_range, dec_range)
+    # lc simulation - if enough data
+    lc = None
+    if len(seldata) > 5:
+        print('go man', len(seldata))
+        lc = simlc(seldata, ra_range, dec_range)
     return lc
 
 
@@ -291,7 +297,7 @@ if __name__ == '__main__':
         for tt in to:
             lc_dict = multiproc(tt, params, simu, nproc, gather=False)
     else:
-        lc_dict = multiproc(ffi[:16], params, simu, nproc, gather=False)
+        lc_dict = multiproc(ffi, params, simu, nproc, gather=False)
 
         # write LC and metadata
         Write = Write_LightCurve(
@@ -300,7 +306,6 @@ if __name__ == '__main__':
         rmeta = []
         rmeta_rej = []
         for i, lcl in lc_dict.items():
-            #print('test', list(map(op.itemgetter(1), lcl)))
             for ll in lcl[0]:
                 rlc.append(ll)
             for ll in lcl[1]:
