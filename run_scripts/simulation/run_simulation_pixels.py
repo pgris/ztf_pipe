@@ -66,6 +66,10 @@ def simu(hpixels, params, j=0, output_q=None):
     cadData = params['cadData']
     runtype = params['runtype']
 
+    # set the night col here
+    obs['night'] = obs['time']-obs['time'].min()
+    obs['night'] = obs['night'].astype(int)
+
     # lc simulation
     simlc = Simul_lc(**params)
 
@@ -78,10 +82,10 @@ def simu(hpixels, params, j=0, output_q=None):
         lc, metadata, meta_rej = processPixel(
             obs, simlc, cadData, healpixID, season)
         if runtype == 'indiv':
-            writeLC(lc, metadata, meta_rej, healpixID, season,
+            writeLC([lc], [metadata], [meta_rej], healpixID, season,
                     outputDir, lcName, metaName, path_prefix)
         else:
-            #r.append((lc, metadata, meta_rej))
+            # r.append((lc, metadata, meta_rej))
             rlc.append(lc)
             rmeta.append(metadata)
             rmeta_rej.append(meta_rej)
@@ -130,73 +134,28 @@ def writeLC(lc, metadata, meta_rejected, healpixID, season, outputDir, lcName, m
     Write.write_data(lc, metadata, meta_rejected, path=path)
 
 
-def add_cols(arro, dictcol={}):
+def add_cols(arro, dictcol={'dummy': 0}):
+    """
+    Function to add columns to an array
 
+    Parameters
+    --------------
+    arro: array
+      original array
+    dictcol: dict, opt
+    colums to add to arr0
+
+    Returns
+    ----------
+    array with appended cols
+
+
+    """
     arr = np.copy(arro)
     for key, val in dictcol.items():
         arr = rf.append_fields(arr, key, [val]*len(arr), usemask=False)
 
     return arr
-
-
-def simu_deprecated(hpixels, params, j=0, output_q=None):
-    """
-    method to perform simulations on multiple healpixIDs
-
-    Parameters
-    --------------
-    hpixels: array
-      list of (pixnum, season) to simulate
-    params: dict
-      dict of parameters
-    j: int, opt
-      internal tag for multiprocessing (proc number) (default: 0)
-    output_q: multiprocessing queue,opt
-     (default: None)
-
-    Returns
-    -----------
-    liste of (lc,metadata)
-
-    """
-
-    hpix = hpixels[0]
-    healpixID = hpix[0]
-    season = hpix[1]
-
-    params['seed'] += j
-    obs = params['obsData']
-    del params['obsData']
-    outputDir = params['outputDirSimu']
-    lcName = params['lcName']
-    metaName = params['metaName']
-    path_prefix = params['path_prefix']
-    cadData = params['cadData']
-
-    # lc simulation
-    simlc = Simul_lc(**params)
-
-    idx = cadData['healpixID'] == healpixID
-    idx &= cadData['season'] == season
-    selcad = cadData[idx]
-    lc = processPixel(selcad.iloc[0], obs, simlc)
-
-    lcName = lcName.replace('.hdf5', '_{}_{}.hdf5'.format(healpixID, season))
-    metaName = metaName.replace(
-        '.hdf5', '_{}_{}.hdf5'.format(healpixID, season))
-
-    # write LC and metadata
-    Write = Write_LightCurve(
-        outputDir=outputDir, file_data=lcName, file_meta=metaName, path_prefix=path_prefix)
-
-    path = '_{}_{}'.format(healpixID, season)
-    Write.write_data(lc, lc.meta_rejected, add_meta=dict(
-        zip(['healpixID', 'season'], [healpixID, season])), path=path)
-
-    if output_q is not None:
-        return output_q.put({j: 1})
-    else:
-        return 0
 
 
 def lcPixel(selcad, obsData, simlc):
@@ -221,22 +180,55 @@ def lcPixel(selcad, obsData, simlc):
     time_max = selcad['time_max']
     healpixRA = selcad['healpixRA']
     healpixDec = selcad['healpixDec']
-    # select observations for this pixel
-    seldata = obsData[obsData['healpixID'].str.contains(str(hpix))]
+    # obsData['healpixID'] = obsData['healpixID'].apply(
+    #    lambda x: x.split(','))
     # select obs corresponding to (time_min, time_max)
-    idx = seldata['time'] >= time_min
-    idx &= seldata['time'] <= time_max
-    seldata = seldata[idx]
+    idx = obsData['time'] >= time_min
+    idx &= obsData['time'] <= time_max
+    seldata = obsData[idx]
+    seldata.loc[:, 'healpixID_new'] = seldata.loc[:,
+                                                  'healpixID'].str.split(',')
+    seldata = seldata.loc[seldata.apply(
+        lambda x: getobs(x, 'healpixID_new', hpix), axis=1)]
+
     ra_range = (healpixRA, healpixRA)
     dec_range = (healpixDec, healpixDec)
     seldata['ra'] = healpixRA
     seldata['dec'] = healpixDec
     # lc simulation - if enough data
     lc = None
+    # coaddition here
+    seldata['healpixID'] = hpix
+    seldata = seldata.groupby(
+        ['night', 'band', 'field', 'rcid']).mean().reset_index()
     if len(seldata) > 5:
-        print('go man', len(seldata))
         lc = simlc(seldata, ra_range, dec_range)
     return lc
+
+
+def getobs(grp, col, hpix):
+    """
+    Function to select a grp from a comparison of sets
+
+    Parameters
+    --------------
+    grp: pandas group
+      data to process
+    col: str
+      colname of the grp
+    hpix: int
+      value to compare with
+
+    Returns
+    ----------
+    True if intersection found, false otherwise
+
+    """
+    hpix = set([str(hpix)])
+    ccp = set(grp[col])
+    #print(ccp, hpix, bool(ccp & hpix))
+
+    return bool(ccp & hpix)
 
 
 # get all possible simulation parameters and put in a dict
