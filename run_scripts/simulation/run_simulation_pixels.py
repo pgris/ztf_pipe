@@ -266,6 +266,9 @@ outputDir = params['outputDirSimu']
 lcName = params['lcName']
 metaName = params['metaName']
 path_prefix = params['path_prefix']
+pixelList = []
+if opts.pixelList != 'all':
+    pixelList = list(map(int, opts.pixelList.split(',')))
 
 # dump script parameters in yaml file
 checkDir(outputDir)
@@ -278,10 +281,16 @@ cadData = loadData(opts.cadDir, opts.cadFile)
 # load observations
 obsData = loadData(opts.obsDir, opts.obsFile)
 
-print(cadData)
-print(obsData)
+# print(cadData)
+# print(obsData)
+
 params['obsData'] = obsData
 params['cadData'] = cadData
+
+if pixelList:
+    idx = cadData['healpixID'].isin(pixelList)
+    cadData = cadData[idx]
+
 if __name__ == '__main__':
     ffi = np.unique(cadData[['healpixID', 'season']].to_records(index=False))
     if opts.runtype == 'indiv':
