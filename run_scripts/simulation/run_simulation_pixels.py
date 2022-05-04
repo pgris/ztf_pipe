@@ -269,6 +269,8 @@ path_prefix = params['path_prefix']
 pixelList = []
 if opts.pixelList != 'all':
     pixelList = list(map(int, opts.pixelList.split(',')))
+npixels = opts.npixels
+
 
 # dump script parameters in yaml file
 checkDir(outputDir)
@@ -290,6 +292,9 @@ params['cadData'] = cadData
 if pixelList:
     idx = cadData['healpixID'].isin(pixelList)
     cadData = cadData[idx]
+
+if npixels > 0:
+    cadData = cadData.sample(n=npixels)
 
 if __name__ == '__main__':
     ffi = np.unique(cadData[['healpixID', 'season']].to_records(index=False))
