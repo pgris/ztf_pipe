@@ -1,6 +1,6 @@
 from optparse import OptionParser
 from astropy.table import Table, vstack
-from ztf_simfit_plot.z_bins import Apply_mask, Z_bins
+from ztf_simfit.ztf_simfit_plot.z_bins import Apply_mask, Z_bins
 import matplotlib.pylab as plt
 
 parser = OptionParser()
@@ -9,6 +9,10 @@ parser.add_option('--meta_fileName', type=str, default='Meta_fit.hdf5',
                   help='meta data file name [%default]')
 parser.add_option('--input_dir', type=str, default='dataLC',
                   help='folder directory name [%default]')
+parser.add_option('--output_dir', type=str, default='dataLC',
+                  help='folder directory name [%default]')
+parser.add_option('--output_fileName', type=str, default='Meta_z_',
+                  help='output meta data file name [%default]')
 parser.add_option('--zmin', type=float, default=0.01,
                   help='redshift min [%default]')
 parser.add_option('--zmax', type=float, default=0.2,
@@ -32,6 +36,8 @@ You want to apply a mask to your metadata : mk = metadata['z']<0.5
 opts, args = parser.parse_args()
 
 meta_fileName = opts.meta_fileName
+output_dir = opts.output_dir
+output_fileName = opts.output_fileName
 input_dir = opts.input_dir
 zmin = opts.zmin
 zmax = opts.zmax
@@ -40,9 +46,8 @@ fontsize = opts.fontsize
 if opts.verbose:
     print('plot by default : $\sigma_{c}$ vs $z$ per bin for all LC')
     CL = Z_bins(metaFitInput=meta_fileName, inputDir=input_dir)
-    CL.plot_err_c_z(error_bar=True, axhline=True)
-    plt.show()
-
+    CL.add_data(output_dir, output_fileName+meta_fileName)
+    
 else:
     print(
         'other plot : $\sigma_{c}$ vs $z$ per bin for LC with r and g bands and LC with r,g and i bands')
@@ -69,3 +74,16 @@ else:
     Z_bins_rg.plot_err_c_z(error_bar=True, axhline=True, color='blue')
     Z_bins_rgi.plot_err_c_z(error_bar=True, color='orange')
     plt.show()
+
+    CL = Z_bins(metaFitInput=meta_fileName, inputDir=input_dir)
+
+    CL.plot_err_c_z(error_bar=True, axhline=True)
+    plt.show()
+
+    print('TEST HERE')
+    CL.plot_interpolation1d(fill=True, add_text=True, axhline=True)
+    plt.show()
+
+    
+
+    
