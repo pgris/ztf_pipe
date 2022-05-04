@@ -20,9 +20,9 @@ parser.add_option('--zmax', type=float, default=0.2,
 parser.add_option('--fontsize', type=int, default=15,
                   help='fontsize for x,y label [%default]')
 parser.add_option('-v', action="store_true", dest="verbose",
-                  default=True, help='plot by default [%default]')
+                  default=True, help='Writting new meta data with value of z limit [%default]')
 parser.add_option("-q", action="store_false", dest="verbose",
-                  help='other plot [%default]')
+                  help='show different plot [%default]')
 
 
 """
@@ -50,7 +50,7 @@ if opts.verbose:
     
 else:
     print(
-        'other plot : $\sigma_{c}$ vs $z$ per bin for LC with r and g bands and LC with r,g and i bands')
+        'plot : $\sigma_{c}$ vs $z$ per bin for LC with r and g bands and LC with r,g and i bands')
     cl_rg = Apply_mask(metaFitInput=meta_fileName, inputDir=input_dir,
                        var={'sel': 'sel', 'c_err': 'c_err', 'zmin': 'z',
                             'zmax': 'z', 'n_i_band': 'n_i_band', 'chi2': 'chi2'},
@@ -80,7 +80,6 @@ else:
     CL.plot_err_c_z(error_bar=True, axhline=True)
     plt.show()
 
-    print('TEST HERE')
     CL.plot_interpolation1d(fill=True, add_text=True, axhline=True)
     plt.show()
 
