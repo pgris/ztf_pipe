@@ -21,6 +21,11 @@ parser.add_option('--nside', type=int, default=128,
                   help='nside healpix parameter [%default]')
 parser.add_option('--coadd_night', type=int, default=1,
                   help='to perform coaddition per band and per night [%default]')
+parser.add_option('--pixelList', type=str, default='all',
+                  help='list of pixels to process [%default]')
+parser.add_option('--npixels', type=int, default=-1,
+                  help='number of pixels to process [%default]')
+
 
 opts, args = parser.parse_args()
 
@@ -32,10 +37,13 @@ metric_name = opts.metric
 nproc = opts.nproc
 nside = opts.nside
 coadd_night = opts.coadd_night
+pixelList = opts.pixelList
+npixels = opts.npixels
 
 df = pd.read_hdf('{}/{}'.format(input_dir, fileName))
 
-resdf = processMetric_multiproc(metric_name, df, nproc, nside, coadd_night)
+resdf = processMetric_multiproc(
+    metric_name, df, nproc, nside, coadd_night, npixels, pixelList)
 
 checkDir(output_dir)
 fName = '{}/{}'.format(output_dir, outName)
