@@ -188,8 +188,9 @@ def lcPixel(selcad, obsData, simlc):
     seldata = obsData[idx]
     seldata.loc[:, 'healpixID_new'] = seldata.loc[:,
                                                   'healpixID'].str.split(',')
-    seldata = seldata.loc[seldata.apply(
-        lambda x: getobs(x, 'healpixID_new', hpix), axis=1)]
+    idb = seldata.apply(
+        lambda x: getobs(x, 'healpixID_new', hpix), axis=1)
+    seldata = seldata.loc[idb]
 
     ra_range = (healpixRA, healpixRA)
     dec_range = (healpixDec, healpixDec)
@@ -287,7 +288,12 @@ obsData = loadData(opts.obsDir, opts.obsFile)
 # print(obsData)
 
 params['obsData'] = obsData
-params['cadData'] = cadData
+
+
+# select pixels/season with minimal season length
+
+idx = cadData['season_length_all'] >= opts.season_length
+cadData = cadData[idx]
 
 if pixelList:
     idx = cadData['healpixID'].isin(pixelList)
@@ -295,6 +301,8 @@ if pixelList:
 
 if npixels > 0:
     cadData = cadData.sample(n=npixels)
+
+params['cadData'] = cadData
 
 if __name__ == '__main__':
     ffi = np.unique(cadData[['healpixID', 'season']].to_records(index=False))
@@ -311,12 +319,23 @@ if __name__ == '__main__':
         rlc = []
         rmeta = []
         rmeta_rej = []
+        path = []
+        path_rej = []
+
         for i, lcl in lc_dict.items():
             for ll in lcl[0]:
                 rlc.append(ll)
             for ll in lcl[1]:
+                hID = -1
                 rmeta.append(ll)
+                if ll is not None:
+                    hID = np.mean(ll['healpixID'])
+                path.append('_{}'.format(int(hID)))
             for ll in lcl[2]:
                 rmeta_rej.append(ll)
+                hID = -1
+                if ll is not None:
+                    hID = np.mean(ll['healpixID'])
+                path_rej.append('_{}'.format(int(hID)))
 
-        data = Write.write_data(rlc, rmeta, rmeta_rej)
+        data = Write.write_data(rlc, rmeta, rmeta_rej, path, path_rej)
