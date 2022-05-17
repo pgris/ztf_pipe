@@ -4,6 +4,37 @@ from ztf_pipeutils.ztf_util import make_dict_from_config, make_dict_from_optpars
 from ztf_pipeutils.ztf_util import dump_in_yaml, checkDir
 import astropy
 import ztf_simfit_input as simfit_input
+from ztf_pipeutils.ztf_util import multiproc
+
+
+def process(vv, params, j=0, output_q=None):
+    """
+    method to perform simulations on multiple healpixIDs
+
+    Parameters
+    --------------
+    vv : array
+      list of data to process
+    params: dict
+      dict of parameters
+    j: int, opt
+      internal tag for multiprocessing (proc number) (default: 0)
+    output_q: multiprocessing queue,opt
+     (default: None)
+
+    Returns
+    -----------
+    liste of (lc,metadata)
+
+    """
+    tab_select = params['tab_select']
+    seltab = get_selec(vv, tab_select)
+
+    if output_q is not None:
+        return output_q.put({j: seltab})
+    else:
+        return seltab
+
 
 # get all possible parameters and put in a dict
 path = list(simfit_input.__path__)
@@ -28,6 +59,7 @@ metaDir = opts.metaDir
 snr = opts.snr
 infoFile = opts.infoFile
 outDir = opts.outputDirInfo
+nproc = opts.nproc
 
 # dump parameters in yaml file
 checkDir(outDir)
@@ -41,14 +73,19 @@ tab_select = astropy.io.ascii.read(csvSelect, format='csv', comment='#')
 
 # get infos
 info = Info(metaFile, metaDir, tab_info, snr)
-restab = info()
+restab = info(bad_prefix='Rej')
 
+print('data loaded', len(restab))
+params = {}
+params['tab_select'] = tab_select
 # apply selection
-seltab = get_selec(restab, tab_select)
+seltab = multiproc(restab, params, process, nproc)
 
+assert(len(seltab) == len(restab))
+"""
 print(seltab['n_phase_neg', 'n_phase_pos',
              'n_phase_min', 'n_phase_max', 'sel'])
-
+"""
 # writing result
 fOut = '{}/{}'.format(outDir, infoFile)
 astropy.io.misc.hdf5.write_table_hdf5(
