@@ -65,6 +65,7 @@ def simu(hpixels, params, j=0, output_q=None):
     path_prefix = params['path_prefix']
     cadData = params['cadData']
     runtype = params['runtype']
+    split_output = params['split_output']
 
     # set the night col here
     obs['night'] = obs['time']-obs['time'].min()
@@ -90,8 +91,17 @@ def simu(hpixels, params, j=0, output_q=None):
             rmeta.append(metadata)
             rmeta_rej.append(meta_rej)
 
+    lc_dict = {}
+    lc_dict[j] = (rlc, rmeta, rmeta_rej)
+
+    if split_output:
+        lcName = lcName.replace('.hdf5', '_{}.hdf5'.format(j))
+        metaName = metaName.replace('.hdf5', '_{}.hdf5'.format(j))
+        write_LC_Meta(outputDir, lcName, metaName, path_prefix, lc_dict)
+        lc_dict = {}
+
     if output_q is not None:
-        return output_q.put({j: (rlc, rmeta, rmeta_rej)})
+        return output_q.put(lc_dict)
     else:
         return 0
 
@@ -227,9 +237,44 @@ def getobs(grp, col, hpix):
     """
     hpix = set([str(hpix)])
     ccp = set(grp[col])
-    #print(ccp, hpix, bool(ccp & hpix))
+    # print(ccp, hpix, bool(ccp & hpix))
 
     return bool(ccp & hpix)
+
+
+def write_LC_Meta(outputDir, file_data, file_meta, path_prefix, lc_dict):
+
+    Write = Write_LightCurve(
+        outputDir=outputDir, file_data=file_data, file_meta=file_meta, path_prefix=path_prefix)
+    rlc = []
+    rmeta = []
+    rmeta_rej = []
+    path = []
+    path_rej = []
+
+    for i, lcl in lc_dict.items():
+        for ll in lcl[0]:
+            rlc.append(ll)
+        for ll in lcl[1]:
+            hID = -1
+            rmeta.append(ll)
+            if ll is not None:
+                hID = np.mean(ll['healpixID'])
+            path.append('_{}'.format(int(hID)))
+        for ll in lcl[2]:
+            if ll is None:
+                rmeta_rej.append(ll)
+                hID = -1
+                path_rej.append('_{}'.format(int(hID)))
+            else:
+                hID = np.mean(ll['healpixID'])
+                rmeta_rej.append(ll)
+                for pp in ll:
+                    path_rej.append('_{}'.format(int(hID)))
+
+    # print('hello', len(rlc), len(rmeta), len(
+    #    rmeta_rej), path, path_rej, rmeta, rmeta_rej)
+    data = Write.write_data(rlc, rmeta, rmeta_rej, path, path_rej)
 
 
 # get all possible simulation parameters and put in a dict
@@ -290,9 +335,10 @@ obsData = loadData(opts.obsDir, opts.obsFile)
 params['obsData'] = obsData
 
 
-# select pixels/season with minimal season length
+# select pixels/season with minimal season length and max E(B-V)
 
 idx = cadData['season_length_all'] >= opts.season_length
+idx &= cadData['ebvofMW'] <= opts.ebvofMW
 cadData = cadData[idx]
 
 if pixelList:
@@ -302,7 +348,10 @@ if pixelList:
 if npixels > 0:
     cadData = cadData.sample(n=npixels)
 
+
+split_output = opts.split_output
 params['cadData'] = cadData
+params['split_output'] = split_output
 
 if __name__ == '__main__':
     ffi = np.unique(cadData[['healpixID', 'season']].to_records(index=False))
@@ -313,29 +362,6 @@ if __name__ == '__main__':
     else:
         lc_dict = multiproc(ffi, params, simu, nproc, gather=False)
 
-        # write LC and metadata
-        Write = Write_LightCurve(
-            outputDir=outputDir, file_data=lcName, file_meta=metaName, path_prefix=path_prefix)
-        rlc = []
-        rmeta = []
-        rmeta_rej = []
-        path = []
-        path_rej = []
-
-        for i, lcl in lc_dict.items():
-            for ll in lcl[0]:
-                rlc.append(ll)
-            for ll in lcl[1]:
-                hID = -1
-                rmeta.append(ll)
-                if ll is not None:
-                    hID = np.mean(ll['healpixID'])
-                path.append('_{}'.format(int(hID)))
-            for ll in lcl[2]:
-                rmeta_rej.append(ll)
-                hID = -1
-                if ll is not None:
-                    hID = np.mean(ll['healpixID'])
-                path_rej.append('_{}'.format(int(hID)))
-
-        data = Write.write_data(rlc, rmeta, rmeta_rej, path, path_rej)
+        if not split_output:
+            # write LC and metadata
+            write_LC_Meta(outputDir, lcName, metaName, path_prefix, lc_dict)
