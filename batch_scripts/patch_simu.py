@@ -7,7 +7,7 @@ parser.add_option('--script', type=str, default='run_scripts/simulation/run_simu
                   help='script to run [%default]')
 parser.add_option('--nprocSimu', type=int, default=8,
                   help='number of procs for multiprocessing [%default]')
-parser.add_option('--transient', type=int, default=500,
+parser.add_option('--ntransient', type=int, default=500,
                   help='number of transients to generate [%default]')
 parser.add_option('--zmin', type=float, default=0.075,
                   help='zmin for SN generation [%default]')
