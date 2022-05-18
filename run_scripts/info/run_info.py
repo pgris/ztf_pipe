@@ -5,6 +5,8 @@ from ztf_pipeutils.ztf_util import dump_in_yaml, checkDir
 import astropy
 import ztf_simfit_input as simfit_input
 from ztf_pipeutils.ztf_util import multiproc
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
 def process(vv, params, j=0, output_q=None):

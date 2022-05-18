@@ -5,6 +5,8 @@ import astropy
 from ztf_pipeutils.ztf_util import multiproc, dump_in_yaml, checkDir
 from ztf_pipeutils.ztf_util import make_dict_from_config, make_dict_from_optparse
 import ztf_simfit_input as simfit_input
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 
 def fit(metaTable, params={}, j=0, output_q=None):

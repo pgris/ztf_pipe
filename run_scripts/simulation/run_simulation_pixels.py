@@ -2,7 +2,7 @@ from optparse import OptionParser
 from ztf_pipeutils.ztf_util import make_dict_from_config, make_dict_from_optparse
 import ztf_simfit_input as simfit_input
 from ztf_pipeutils.ztf_util import multiproc, dump_in_yaml, checkDir
-from ztf_pipeutils.ztf_hdf5 import Write_LightCurve
+from ztf_pipeutils.ztf_hdf5 import Write_LightCurve, Write_LightCurve_cumul
 from ztf_simfit.ztf_simu import Simul_lc
 import pandas as pd
 import os
@@ -10,6 +10,9 @@ import copy
 import numpy as np
 import numpy.lib.recfunctions as rf
 import operator as op
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+pd.options.mode.chained_assignment = None  # default='warn'
 
 
 def loadData(theDir, theFile):
@@ -65,7 +68,7 @@ def simu(hpixels, params, j=0, output_q=None):
     path_prefix = params['path_prefix']
     cadData = params['cadData']
     runtype = params['runtype']
-    split_output = params['split_output']
+    backup_on_the_fly = params['backup_on_the_fly']
 
     # set the night col here
     obs['night'] = obs['time']-obs['time'].min()
@@ -74,17 +77,32 @@ def simu(hpixels, params, j=0, output_q=None):
     # lc simulation
     simlc = Simul_lc(**params)
 
+    # prepare for output
+    if backup_on_the_fly:
+        lcName = lcName.replace('.hdf5', '_{}.hdf5'.format(j))
+        metaName = metaName.replace('.hdf5', '_{}.hdf5'.format(j))
+        write_fly = Write_LightCurve_cumul(
+            outputDir=outputDir, file_data=lcName, file_meta=metaName, path_prefix=path_prefix)
+
     rlc = []
     rmeta = []
     rmeta_rej = []
+
     for vv in hpixels:
         healpixID = vv[0]
         season = vv[1]
-        lc, metadata, meta_rej = processPixel(
+        lc, metadata, metarej = processPixel(
             obs, simlc, cadData, healpixID, season)
         if runtype == 'indiv':
             writeLC([lc], [metadata], [meta_rej], healpixID, season,
                     outputDir, lcName, metaName, path_prefix)
+        if backup_on_the_fly:
+            forpath = '{}_{}'.format(healpixID, int(season))
+            try:
+                write_fly.write(lc, metadata, metarej, path='{}_{}'.format(
+                    path_prefix, forpath), pathRej='Rej_{}'.format(forpath))
+            except (TypeError, ValueError) as exc:
+                pass
         else:
             # r.append((lc, metadata, meta_rej))
             rlc.append(lc)
@@ -92,13 +110,8 @@ def simu(hpixels, params, j=0, output_q=None):
             rmeta_rej.append(meta_rej)
 
     lc_dict = {}
-    lc_dict[j] = (rlc, rmeta, rmeta_rej)
-
-    if split_output:
-        lcName = lcName.replace('.hdf5', '_{}.hdf5'.format(j))
-        metaName = metaName.replace('.hdf5', '_{}.hdf5'.format(j))
-        write_LC_Meta(outputDir, lcName, metaName, path_prefix, lc_dict)
-        lc_dict = {}
+    if not backup_on_the_fly:
+        lc_dict[j] = (rlc, rmeta, rmeta_rej)
 
     if output_q is not None:
         return output_q.put(lc_dict)
@@ -214,6 +227,7 @@ def lcPixel(selcad, obsData, simlc):
         ['night', 'band', 'field', 'rcid']).mean().reset_index()
     if len(seldata) > 5:
         lc = simlc(seldata, ra_range, dec_range)
+
     return lc
 
 
@@ -349,9 +363,9 @@ if npixels > 0:
     cadData = cadData.sample(n=npixels)
 
 
-split_output = opts.split_output
+backup_on_the_fly = opts.backupFly
 params['cadData'] = cadData
-params['split_output'] = split_output
+params['backup_on_the_fly'] = backup_on_the_fly
 
 if __name__ == '__main__':
     ffi = np.unique(cadData[['healpixID', 'season']].to_records(index=False))
@@ -362,6 +376,6 @@ if __name__ == '__main__':
     else:
         lc_dict = multiproc(ffi, params, simu, nproc, gather=False)
 
-        if not split_output:
+        if not backup_on_the_fly:
             # write LC and metadata
             write_LC_Meta(outputDir, lcName, metaName, path_prefix, lc_dict)
