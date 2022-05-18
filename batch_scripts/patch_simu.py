@@ -28,16 +28,6 @@ parser.add_option('--cadDir', type=str, default='/sps/ztf/users/gris/metricOutpu
 
 opts, args = parser.parse_args()
 
-"""
-# load the new values
-params = {}
-for key, vals in confDict.items():
-    newval = eval('opts.{}'.format(key))
-    # params[key] = (vals[0], newval)
-    params[key] = newval
-
-print(params)
-"""
 params = vars(opts)
 params['cadFile'] = params['obsFile'].replace('data', 'cadence')
 params['lcName'] = params['obsFile'].replace('data', 'LC')
@@ -50,6 +40,8 @@ print(params)
 
 procName = 'simu_{}'.format(params['obsFile'].split('.hdf5')[0])
 
+thescript = params['script']
+params.pop('script')
 bb = BatchIt(processName=procName)
 bb.add_batch(thescript, params)
-# bb.go_batch()
+bb.go_batch()
