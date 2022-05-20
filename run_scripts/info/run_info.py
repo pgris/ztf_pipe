@@ -77,7 +77,6 @@ tab_select = astropy.io.ascii.read(csvSelect, format='csv', comment='#')
 info = Info(metaFile, metaDir, tab_info, snr)
 restab = info(bad_prefix='Rej')
 
-print('data loaded', len(restab))
 params = {}
 params['tab_select'] = tab_select
 # apply selection
