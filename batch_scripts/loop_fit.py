@@ -42,10 +42,10 @@ fams = get_metaFamily(fis)
 print(fams)
 for metaPrefix in fams:
     params['metaPrefix'] = metaPrefix
-    cmd = 'python batch_scripts/patch_info.py'
+    cmd = 'python batch_scripts/patch_fit.py'
     for key, val in params.items():
         cmd += ' --{} {}'.format(key,val)
 
     print(cmd)
-    #os.system(cmd)
+    os.system(cmd)
 
