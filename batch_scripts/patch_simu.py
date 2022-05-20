@@ -25,6 +25,8 @@ parser.add_option('--obsFile', type=str, default='data_36.0_72.0.hdf5',
                   help='obs file to process [%default]')
 parser.add_option('--cadDir', type=str, default='/sps/ztf/users/gris/metricOutput/cadenceMetric',
                   help='dir with cadence infos [%default]')
+parser.add_option('--npixelsBatch', type=int, default=500,
+                  help='npixels per batch run [%default]')
 
 opts, args = parser.parse_args()
 
