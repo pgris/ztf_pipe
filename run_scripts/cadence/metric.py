@@ -1,10 +1,14 @@
 import pandas as pd
+import numpy as np
 from optparse import OptionParser
-from ztf_metrics.metricWrapper import processMetric_multiproc
-from ztf_pipeutils.ztf_util import checkDir
+from ztf_cadence.ztf_metrics.metricWrapper import processMetric_multiproc
+from ztf_pipeutils.ztf_pipeutils.ztf_hdf5 import Read_LightCurve
+from ztf_pipeutils.ztf_pipeutils.ztf_util import checkDir
 
 parser = OptionParser()
 
+parser.add_option('--type_tab', type=str, default='pandas',
+                  help='type of the table in the meta data file (pandas or AstropyTable) [%default]')
 parser.add_option('--fileName', type=str, default='data_36.0_72.0.hdf5',
                   help='meta data file name [%default]')
 parser.add_option('--input_dir', type=str, default='pixelized_newformat',
@@ -29,6 +33,7 @@ parser.add_option('--npixels', type=int, default=-1,
 
 opts, args = parser.parse_args()
 
+type_tab = opts.type_tab
 fileName = opts.fileName
 input_dir = opts.input_dir
 outName = opts.outName
@@ -40,12 +45,20 @@ coadd_night = opts.coadd_night
 pixelList = opts.pixelList
 npixels = opts.npixels
 
-df = pd.read_hdf('{}/{}'.format(input_dir, fileName))
+if __name__ == '__main__':
+    
+    if type_tab =='pandas':
+        df = pd.read_hdf('{}/{}'.format(input_dir, fileName))
+    if type_tab =='AstropyTable':
+        cl = Read_LightCurve(file_name=fileName, inputDir=input_dir)
+        df_A = cl.get_table(path='meta')
+        df = pd.DataFrame(np.array(df_A))
+        
+    df['healpixID'] = df['healpixID'].astype(str)
+        
+    resdf = processMetric_multiproc(metric_name, df, nproc, nside, coadd_night, npixels, pixelList)
 
-resdf = processMetric_multiproc(
-    metric_name, df, nproc, nside, coadd_night, npixels, pixelList)
-
-checkDir(output_dir)
-fName = '{}/{}'.format(output_dir, outName)
-resdf.to_hdf(fName, key='metric')
-print(resdf)
+    checkDir(output_dir)
+    fName = '{}/{}'.format(output_dir, outName)
+    resdf.to_hdf(fName, key='metric')
+    print(resdf)
