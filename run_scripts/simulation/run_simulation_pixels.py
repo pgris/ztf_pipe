@@ -330,7 +330,7 @@ pixelList = []
 if opts.pixelList != 'all':
     pixelList = list(map(int, opts.pixelList.split(',')))
 npixels = opts.npixels
-
+npixelsBatch = opts.npixelsBatch
 
 # dump script parameters in yaml file
 checkDir(outputDir)
@@ -355,13 +355,14 @@ idx = cadData['season_length_all'] >= opts.season_length
 idx &= cadData['ebvofMW'] <= opts.ebvofMW
 cadData = cadData[idx]
 
+#print('number of pixels to process', len(np.unique(cadData['healpixID'])))
+
 if pixelList:
     idx = cadData['healpixID'].isin(pixelList)
     cadData = cadData[idx]
 
 if npixels > 0:
     cadData = cadData.sample(n=npixels)
-
 
 backup_on_the_fly = opts.backupFly
 params['cadData'] = cadData
@@ -374,7 +375,22 @@ if __name__ == '__main__':
         for tt in to:
             lc_dict = multiproc(tt, params, simu, nproc, gather=False)
     else:
-        lc_dict = multiproc(ffi, params, simu, nproc, gather=False)
+        t = []
+        lcName_orig = params['lcName']
+        metaName_orig = params['metaName']
+        if npixelsBatch > 0:
+            npp = int(len(ffi)/npixelsBatch)
+            t = np.linspace(0, len(ffi), npp+1, dtype='int').tolist()
+        if t:
+            for io in range(len(t)-1):
+                params['lcName'] = lcName_orig.replace(
+                    '.hdf5', '_{}.hdf5'.format(io))
+                params['metaName'] = metaName_orig.replace(
+                    '.hdf5', '_{}.hdf5'.format(io))
+                lc_dict = multiproc(
+                    ffi[t[io]:t[io+1]], params, simu, nproc, gather=False)
+        else:
+            lc_dict = multiproc(ffi, params, simu, nproc, gather=False)
 
         if not backup_on_the_fly:
             # write LC and metadata
