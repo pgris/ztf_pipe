@@ -1,6 +1,6 @@
 from optparse import OptionParser
 from astropy.table import Table, vstack
-from ztf_simfit_plot.z_bins import Apply_mask, Z_bins
+from ztf_simfit.ztf_simfit_plot.z_bins import Apply_mask, Z_bins
 import matplotlib.pylab as plt
 
 parser = OptionParser()
@@ -80,5 +80,5 @@ else:
     CL.plot_err_c_z(error_bar=True, axhline=True)
     plt.show()
 
-    #CL.plot_interpolation1d(fill=True, add_text=True, axhline=True)
+    CL.plot_interpolation1d(fill=True, add_text=True, axhline=True)
     plt.show()
