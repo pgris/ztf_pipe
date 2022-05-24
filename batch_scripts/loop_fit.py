@@ -19,7 +19,7 @@ def get_metaFamily(fis):
 
     r = []
     for fi in fis:
-        tt = '_'.join(fi.split('/')[-1].split('_')[:3])
+        tt = '_'.join(fi.split('/')[-1].split('_')[:5])
         r.append(tt)
 
     return set(r)

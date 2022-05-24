@@ -1,6 +1,8 @@
 import glob
 import os
 from optparse import OptionParser
+from ztf_pipeutils.ztf_batch import BatchIt
+
 import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
@@ -8,7 +10,7 @@ parser = OptionParser()
 
 parser.add_option('--script', type=str, default='run_scripts/fit_lc/run_fit_lc.py',
                   help='script to run [%default]')
-parser.add_option('--nproc', type=int, default=8,
+parser.add_option('--nprocFit', type=int, default=8,
                   help='number of procs for multiprocessing [%default]')
 parser.add_option('--metaDirInput', type=str, default='infoLC',
                   help='metadata dir input[%default]')
@@ -19,25 +21,34 @@ parser.add_option('--metaPrefix', type=str, default='meta_info_36.0_72.0',
 
 opts, args = parser.parse_args()
 
-script = 'python {}'.format(opts.script)
+script = opts.script
 
 metaDirInput = opts.metaDirInput
 metaDirOutput = opts.metaDirOutput
-meta_prefix = opts.metaPrefix
-nproc = 8
+metaPrefix = opts.metaPrefix
 
-search_path = '{}/{}*.hdf5'.format(metaDirInput, meta_prefix)
+search_path = '{}/{}*.hdf5'.format(metaDirInput, metaPrefix)
 print(search_path)
 fis = glob.glob(search_path)
+
+procName='fit_{}'.format(opts.metaPrefix)
+
+params = vars(opts)
+params.pop('script')
+params.pop('metaPrefix')
+
+
+bb = BatchIt(processName=procName)
 
 for fi in fis:
     metaFileInput = fi.split('/')[-1]
     metaFileOutput = metaFileInput.replace('info', 'fit')
     cmd = '{}'.format(script)
-    cmd += ' --metaDirInput {}'.format(metaDirInput)
-    cmd += ' --metaFileInput {}'.format(metaFileInput)
-    cmd += ' --metaDirOutput {}'.format(metaDirOutput)
-    cmd += ' --metaFileOutput {}'.format(metaFileOutput)
-    cmd += ' --nprocFit {}'.format(nproc)
-    print(cmd)
-    os.system(cmd)
+    params['metaFileInput'] = metaFileInput
+    params['metaFileOutput'] = metaFileOutput
+
+    bb.add_batch(script, params)
+    #print(cmd)
+    #os.system(cmd)
+
+bb.go_batch()
