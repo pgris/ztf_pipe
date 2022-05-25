@@ -3,11 +3,72 @@ import numpy as np
 from optparse import OptionParser
 from ztf_metrics.metricWrapper import processMetric_multiproc
 from ztf_pipeutils.ztf_hdf5 import Read_LightCurve
-from ztf_pipeutils.ztf_util import checkDir
+from ztf_pipeutils.ztf_util import checkDir, multiproc
+import glob
+
+
+def load_multi(fis, params={}, j=0, output_q=None):
+    """
+    Method to load data using multiptocessing
+
+    Parameters
+    --------------
+   fis: list
+      list of files to process
+    params: dict, opt
+      dict of parameters (default: {})
+
+    Returns
+    --------------
+    New data frame for the differents pixels with the calculation (value) of differents metrics.
+    """
+
+    type_data = params['type_data']
+    input_dir = params['input_dir']
+
+    df = pd.DataFrame()
+    for fi in fis:
+        fName = fi.split('/')[-1]
+        dfa = get_data(type_data, input_dir, fName)
+        df = pd.concat((df, dfa))
+
+    if output_q is not None:
+        return output_q.put({j: df})
+    else:
+        return df
+
+
+def get_data(type_data, input_dir, fileName):
+    """
+    Function to get data
+
+    Parameters
+    --------------
+    type_data: str
+      data type to load (pandas or AstropyTable)
+    input_dir: str
+      input data dir
+    fileName: str
+      filename of data to load
+
+    Returns
+    ----------
+    pandas df ot data
+
+    """
+    if type_data == 'pandas':
+        df = pd.read_hdf('{}/{}'.format(input_dir, fileName))
+    if type_data == 'AstropyTable':
+        cl = Read_LightCurve(file_name=fileName, inputDir=input_dir)
+        df_A = cl.get_table(path='meta')
+        df = pd.DataFrame(np.array(df_A))
+
+    return df
+
 
 parser = OptionParser()
 
-parser.add_option('--type_tab', type=str, default='pandas',
+parser.add_option('--type_data', type=str, default='pandas',
                   help='type of the table in the meta data file (pandas or AstropyTable) [%default]')
 parser.add_option('--fileName', type=str, default='data_36.0_72.0.hdf5',
                   help='meta data file name [%default]')
@@ -33,7 +94,7 @@ parser.add_option('--npixels', type=int, default=-1,
 
 opts, args = parser.parse_args()
 
-type_tab = opts.type_tab
+type_data = opts.type_data
 fileName = opts.fileName
 input_dir = opts.input_dir
 outName = opts.outName
@@ -47,12 +108,23 @@ npixels = opts.npixels
 
 if __name__ == '__main__':
 
+    if fileName == 'all':
+        search_path = '{}/meta_fit*.hdf5'.format(input_dir)
+        fis = glob.glob(search_path)
+        params = {}
+        params['type_data'] = type_data
+        params['input_dir'] = input_dir
+        df = multiproc(fis, params, load_multi, nproc=8)
+    else:
+        df = get_data(type_data, input_dir, fileName)
+    """
     if type_tab == 'pandas':
         df = pd.read_hdf('{}/{}'.format(input_dir, fileName))
     if type_tab == 'AstropyTable':
         cl = Read_LightCurve(file_name=fileName, inputDir=input_dir)
         df_A = cl.get_table(path='meta')
         df = pd.DataFrame(np.array(df_A))
+    """
 
     df['healpixID'] = df['healpixID'].astype(str)
 
