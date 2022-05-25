@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 from optparse import OptionParser
-from ztf_cadence.ztf_metrics.metricWrapper import processMetric_multiproc
-from ztf_pipeutils.ztf_pipeutils.ztf_hdf5 import Read_LightCurve
-from ztf_pipeutils.ztf_pipeutils.ztf_util import checkDir
+from ztf_metrics.metricWrapper import processMetric_multiproc
+from ztf_pipeutils.ztf_hdf5 import Read_LightCurve
+from ztf_pipeutils.ztf_util import checkDir
 
 parser = OptionParser()
 
@@ -46,17 +46,18 @@ pixelList = opts.pixelList
 npixels = opts.npixels
 
 if __name__ == '__main__':
-    
-    if type_tab =='pandas':
+
+    if type_tab == 'pandas':
         df = pd.read_hdf('{}/{}'.format(input_dir, fileName))
-    if type_tab =='AstropyTable':
+    if type_tab == 'AstropyTable':
         cl = Read_LightCurve(file_name=fileName, inputDir=input_dir)
         df_A = cl.get_table(path='meta')
         df = pd.DataFrame(np.array(df_A))
-        
+
     df['healpixID'] = df['healpixID'].astype(str)
-        
-    resdf = processMetric_multiproc(metric_name, df, nproc, nside, coadd_night, npixels, pixelList)
+
+    resdf = processMetric_multiproc(
+        metric_name, df, nproc, nside, coadd_night, npixels, pixelList)
 
     checkDir(output_dir)
     fName = '{}/{}'.format(output_dir, outName)
