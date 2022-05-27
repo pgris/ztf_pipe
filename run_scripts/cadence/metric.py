@@ -117,14 +117,6 @@ if __name__ == '__main__':
         df = multiproc(fis, params, load_multi, nproc=8)
     else:
         df = get_data(type_data, input_dir, fileName)
-    """
-    if type_tab == 'pandas':
-        df = pd.read_hdf('{}/{}'.format(input_dir, fileName))
-    if type_tab == 'AstropyTable':
-        cl = Read_LightCurve(file_name=fileName, inputDir=input_dir)
-        df_A = cl.get_table(path='meta')
-        df = pd.DataFrame(np.array(df_A))
-    """
 
     df['healpixID'] = df['healpixID'].astype(str)
 
