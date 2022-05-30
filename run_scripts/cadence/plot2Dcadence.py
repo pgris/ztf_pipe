@@ -1,7 +1,6 @@
 import pandas as pd
 from optparse import OptionParser
-import matplotlib.pylab as plt
-import matplotlib as mpl
+from ztf_metrics import plt
 import os
 from ztf_metrics.plot_metric_for_cadence import PlotCAD
 from ztf_metrics.plot_metric import PlotOS
@@ -38,7 +37,7 @@ for filename in os.listdir(input_dir):
     tab_file = pd.read_hdf('{}/{}'.format(input_dir, filename))
     tab = pd.concat([tab, tab_file])
 
-tab = tab[tab['ebvofMW'] < 0.25]
+#tab = tab[tab['ebvofMW'] < 0.25]
 
 #clnm = ['cad_all', 'cad_ztfg', 'cad_ztfr', 'cad_ztfi']
 
@@ -67,4 +66,18 @@ for c in clnm:
         fig2 = cl.visu(tab=tab[tab['season'] == i], vardisp=c, healpixId='healpixID', title=c+' S{}'.format(i),
                        inum=inum, save=False, cbar=False)
     """
+
+fig, ax = plt.subplots(figsize=(10, 8))
+idx = tab['zlim'] > 0.
+sel = tab[idx]
+ax.hist(sel['zlim'], histtype='step', bins=30, color='k', lw=2)
+secax = ax.twiny()
+secax.hist(sel['mag'], histtype='step', bins=30, ls='dashed', color='b', lw=2)
+ax.grid()
+ax.set_xlabel('$z_{complete}$')
+ax.set_ylabel('Number of entries')
+secax.set_xlabel('mag limit', color='b')
+secax.spines['top'].set_color('b')
+secax.xaxis.label.set_color('b')
+secax.tick_params(axis='x', colors='b')
 plt.show()
