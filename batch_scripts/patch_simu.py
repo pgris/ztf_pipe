@@ -40,7 +40,7 @@ params['backupFly'] = 1
 
 print(params)
 
-procName = 'simu_{}'.format(params['obsFile'].split('.hdf5')[0])
+procName = 'simu_{}_{}_{}'.format(params['obsFile'].split('.hdf5')[0],params['zmin'],params['zmax'])
 
 thescript = params['script']
 params.pop('script')
