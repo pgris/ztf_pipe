@@ -44,10 +44,16 @@ def sel_obs_sky(df_obs,
     data inside the area (pandas df)
 
     """
-    idx = df_obs[raCol] >= ra_min-k*width_ra
-    idx &= df_obs[raCol] < ra_max+k*width_ra
-    idx &= df_obs[decCol] >= dec_min-k*width_dec
-    idx &= df_obs[decCol] < dec_max+k*width_dec
+
+    ra_lower = ra_min-k*width_ra
+    ra_upper =  ra_max+k*width_ra
+    dec_lower = dec_min-k*width_dec
+    dec_upper = dec_max+k*width_dec
+    
+    idx = df_obs[raCol] >= ra_lower
+    idx &= df_obs[raCol] < ra_upper
+    idx &= df_obs[decCol] >= dec_lower
+    idx &= df_obs[decCol] < dec_upper
 
     return df_obs[idx]
 
@@ -260,7 +266,7 @@ print(params)
 # get log of observations
 logObs = params['logObs']
 print('loading', logObs)
-df_obs = pd.read_csv(logObs)
+df_obs_orig = pd.read_csv(logObs)
 
 ra_min = opts.RAmin
 ra_max = opts.RAmax
@@ -270,8 +276,12 @@ dec_max = opts.Decmax
 width_ra = opts.width_RA
 width_dec = opts.width_Dec
 
-df_obs = sel_obs_sky(df_obs, ra_min, ra_max, dec_min,
-                     dec_max, width_ra, width_dec, k=1.05)
+df_obs = sel_obs_sky(df_obs_orig, ra_min, ra_max, dec_min,
+                     dec_max, width_ra, width_dec, k=2.0)
+if ra_min <= 0.05:
+    add_obs = sel_obs_sky(df_obs_orig, 358., 360., dec_min,
+                     dec_max, width_ra, width_dec, k=2.0)
+    df_obs = pd.concat((df_obs,add_obs))
 
 # re-align quadrant centers - if requested
 
