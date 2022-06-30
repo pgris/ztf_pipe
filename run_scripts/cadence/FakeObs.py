@@ -22,7 +22,11 @@ parser.add_option('--skynoise_i', type=int, default=33.49885752052873,
 
 parser.add_option('--MJD_min', type=int, default=2.458435*10**6,
                   help='MJD minimum [%default]')
-parser.add_option('--zp', type=int, default=26.275,
+parser.add_option('--zp_g', type=int, default=26.275,
+                  help='zero point [%default]')
+parser.add_option('--zp_r', type=int, default=26.325,
+                  help='zero point [%default]')
+parser.add_option('--zp_i', type=int, default=25.66,
                   help='zero point [%default]')
 
 parser.add_option('--healpixID_min', type=int, default=0,
@@ -44,11 +48,15 @@ opts, args = parser.parse_args()
 
 cad_g = opts.cad_g
 cad_r = opts.cad_r
-
 cad_i = opts.cad_i
+
 skynoise_g = opts.skynoise_g
 skynoise_r = opts.skynoise_r
 skynoise_i = opts.skynoise_i
+
+zp_g = opts.zp_g 
+zp_r = opts.zp_r
+zp_i = opts.zp_i
 
 MJD_min = opts.MJD_min
 
