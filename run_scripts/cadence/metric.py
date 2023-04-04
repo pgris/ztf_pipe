@@ -120,6 +120,20 @@ if __name__ == '__main__':
 
     df['healpixID'] = df['healpixID'].astype(str)
 
+    # df['healpixID'] = [list(map((lambda x: 'p' + x+'p'), suits))
+    #                   for suits in df['healpixID']]
+    df['healpixID'] = [','.join(list(map(
+        lambda orig_string: 'p'+orig_string + 'p', suits.split(',')))) for suits in df['healpixID']]
+    # print(df['healpixID'])
+
+    """
+    idx = df['healpixID'] != 'None'
+    df = df[idx]
+    df['healpixID'] = [list(map(int, i.split(','))) for i in df['healpixID']]
+    print('rr', df.columns)
+    print(df['healpixID'])
+    """
+
     resdf = processMetric_multiproc(
         metric_name, df, nproc, nside, coadd_night, npixels, pixelList)
 
