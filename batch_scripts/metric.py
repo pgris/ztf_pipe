@@ -11,7 +11,7 @@ parser.add_option('--input_dir', type=str, default='/sps/ztf/users/gris/pixelize
 parser.add_option('--output_dir', type=str, default='/sps/ztf/users/gris/metricOutput/cadenceMetric',
                   help='output directory [%default]')
 parser.add_option('--metric', type=str, default='CadenceMetric',
-                  help='metric name [%default]')
+                  help='metric name (CadenceMetric, RedMagMetric) [%default]')
 parser.add_option('--nproc', type=int, default=8,
                   help='number of procs for multiprocessing [%default]')
 
