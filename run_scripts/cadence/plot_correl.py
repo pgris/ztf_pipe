@@ -21,8 +21,8 @@ zcompData = loadData(zcompDir)
 print(cadenceData)
 print(zcompData)
 
-dataCorr = zcompData.merge(cadenceData, left_on=[
-                           'healpixID', 'season'], right_on=['healpixID', 'season'])
+dataCorr = zcompData.merge(cadenceData, left_on=['healpixID', 'season'],
+                           right_on=['healpixID', 'season'])
 
 idx = dataCorr['zlim'] > 0.
 idx &= dataCorr['cad_all'] <= 5.
@@ -46,7 +46,7 @@ ax.plot(bba['cad_all'], bba['zlim'], color='k',
 ax.fill_between(bba['cad_all'], bba['zlim']+bba['zlim_std'],
                 bba['zlim']-bba['zlim_std'], color='gray', alpha=0.5)
 ax.plot(bbb['cad_all'], bbb['zlim'], color='k',
-        marker='o', lineStyle='dashed', mfc='None', label='$gri$')
+        marker='o', linestyle='dashed', mfc='None', label='$gri$')
 ax.fill_between(bbb['cad_all'], bbb['zlim']+bbb['zlim_std'],
                 bbb['zlim']-bbb['zlim_std'], color='yellow', alpha=0.5)
 ax.grid()
