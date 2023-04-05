@@ -15,7 +15,7 @@ parser.add_option('--zmax', type=float, default=0.13,
                   help='zmax for SN generation [%default]')
 parser.add_option('--color_mean', type=float, default=0.2,
                   help='mean color for SN generation [%default]')
-parser.add_option('--stretch_mean', type=float, default=2.0,
+parser.add_option('--stretch_mean', type=float, default=-2.0,
                   help='mean x1 for SN generation [%default]')
 parser.add_option('--outputDirSimu', type=str, default='/sps/ztf/users/gris/dataLC',
                   help='output dir for simulation [%default]')
