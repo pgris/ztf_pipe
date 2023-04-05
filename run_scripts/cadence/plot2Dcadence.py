@@ -45,8 +45,25 @@ min_tab = [0.001]*len(clnm)
 var = list(tab['season'].unique())
 var.append('all')
 
-#cl = PlotCAD(outDir=outDir)
+"""
+cl = PlotCAD(outDir=outDir)
 
+for c in clnm:
+    print(c)
+    ido = tab[c] > 0.
+    sel = tab[ido]
+    min_tab = 0.9*sel[c].min()
+    max_tab = 1.1*sel[c].max()
+
+    fig1 = cl.visu(tab=tab, vardisp=c, healpixId='healpixID',
+                   title=c, inum=inum, save=False, cbar=True)
+    for i in range(1, len(var)):
+        print('S_', i)
+        fig2 = cl.visu(tab=tab[tab['season'] == i], vardisp=c, healpixId='healpixID', title=c+' S{}'.format(i),
+                       inum=inum, save=False, cbar=False)
+
+plt.show()
+"""
 cl = PlotOS(outDir=outDir)
 
 for c in clnm:
@@ -67,10 +84,12 @@ for c in clnm:
                        inum=inum, save=False, cbar=False)
     """
 
+"""
 fig, ax = plt.subplots(figsize=(10, 8))
 idx = tab['zlim'] > 0.
 sel = tab[idx]
 ax.hist(sel['zlim'], histtype='step', bins=30, color='k', lw=2)
+print('median', np.median(sel['zlim']), np.median(sel['mag']))
 secax = ax.twiny()
 secax.hist(sel['mag'], histtype='step', bins=30, ls='dashed', color='b', lw=2)
 ax.grid()
@@ -80,4 +99,5 @@ secax.set_xlabel('mag limit', color='b')
 secax.spines['top'].set_color('b')
 secax.xaxis.label.set_color('b')
 secax.tick_params(axis='x', colors='b')
+"""
 plt.show()
