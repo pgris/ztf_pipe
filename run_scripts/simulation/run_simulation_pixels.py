@@ -82,7 +82,8 @@ def simu(hpixels, params, j=0, output_q=None):
         lcName = lcName.replace('.hdf5', '_{}.hdf5'.format(j))
         metaName = metaName.replace('.hdf5', '_{}.hdf5'.format(j))
         write_fly = Write_LightCurve_cumul(
-            outputDir=outputDir, file_data=lcName, file_meta=metaName, path_prefix=path_prefix)
+            outputDir=outputDir, file_data=lcName, file_meta=metaName,
+            path_prefix=path_prefix)
 
     rlc = []
     rmeta = []
@@ -91,7 +92,7 @@ def simu(hpixels, params, j=0, output_q=None):
     for vv in hpixels:
         healpixID = vv[0]
         season = vv[1]
-        lc, metadata, metarej = processPixel(
+        lc, metadata, meta_rej = processPixel(
             obs, simlc, cadData, healpixID, season)
         if runtype == 'indiv':
             writeLC([lc], [metadata], [meta_rej], healpixID, season,
@@ -99,7 +100,7 @@ def simu(hpixels, params, j=0, output_q=None):
         if backup_on_the_fly:
             forpath = '{}_{}'.format(healpixID, int(season))
             try:
-                write_fly.write(lc, metadata, metarej, path='{}_{}'.format(
+                write_fly.write(lc, metadata, meta_rej, path='{}_{}'.format(
                     path_prefix, forpath), pathRej='Rej_{}'.format(forpath))
             except (TypeError, ValueError) as exc:
                 pass
@@ -211,6 +212,7 @@ def lcPixel(selcad, obsData, simlc):
     seldata = obsData[idx]
     seldata.loc[:, 'healpixID_new'] = seldata.loc[:,
                                                   'healpixID'].str.split(',')
+
     idb = seldata.apply(
         lambda x: getobs(x, 'healpixID_new', hpix), axis=1)
     seldata = seldata.loc[idb]
@@ -312,7 +314,6 @@ for key, vals in confDict.items():
     newval = eval('opts.{}'.format(key))
     # params[key] = (vals[0], newval)
     params[key] = newval
-print(params)
 
 if params['ztfdataDir'] == 'default':
     import ztf_data as ztf_data
@@ -348,7 +349,6 @@ obsData = loadData(opts.obsDir, opts.obsFile)
 
 params['obsData'] = obsData
 
-
 # select pixels/season with minimal season length and max E(B-V)
 
 idx = cadData['season_length_all'] >= opts.season_length
@@ -360,6 +360,7 @@ cadData = cadData[idx]
 if pixelList:
     idx = cadData['healpixID'].isin(pixelList)
     cadData = cadData[idx]
+
 
 if npixels > 0:
     cadData = cadData.sample(n=npixels)
