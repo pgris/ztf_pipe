@@ -94,7 +94,7 @@ parser.add_option('--npixels', type=int, default=-1,
 
 opts, args = parser.parse_args()
 
-type_data = opts.type_data 
+type_data = opts.type_data
 fileName = opts.fileName
 input_dir = opts.input_dir
 outName = opts.outName
