@@ -31,6 +31,7 @@ fis = glob.glob('{}/*.hdf5'.format(input_dir))
 print(fis)
 
 thescript = 'run_scripts/cadence/metric.py'
+
 for fi in fis:
     procName = '.'.join(fi.split('/')[-1].split('.')[:-1])
     print(procName, fi.split('/')[-1])
@@ -44,5 +45,7 @@ for fi in fis:
     params['metric'] = metric_name
     params['nproc'] = nproc
     params['type_data'] = type_data
+    if metric_name == 'RedMagMetric':
+        params['fileName'] = 'all'
     bb.add_batch(thescript, params)
     bb.go_batch()
