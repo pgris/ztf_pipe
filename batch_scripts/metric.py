@@ -27,6 +27,8 @@ type_data = opts.type_data
 checkDir(output_dir)
 
 fis = glob.glob('{}/*.hdf5'.format(input_dir))
+if metric_name == 'RedMagMetric':
+    fis = glob.glob('{}/*'.format(input_dir))
 
 print(fis)
 
