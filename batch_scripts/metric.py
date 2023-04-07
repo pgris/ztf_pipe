@@ -14,8 +14,6 @@ parser.add_option('--metric', type=str, default='CadenceMetric',
                   help='metric name (CadenceMetric, RedMagMetric) [%default]')
 parser.add_option('--nproc', type=int, default=8,
                   help='number of procs for multiprocessing [%default]')
-parser.add_option('--nproc', type=int, default=8,
-                  help='number of procs for multiprocessing [%default]')
 parser.add_option('--type_data', type=str, default='pandas',
                   help='type of the table in the meta data file (pandas or AstropyTable) [%default]')
 opts, args = parser.parse_args()
