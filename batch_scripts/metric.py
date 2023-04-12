@@ -73,4 +73,4 @@ for fi in fis:
             bb.add_batch(thescript, pp)
     else:
         bb.add_batch(thescript, params)
-    # bb.go_batch()
+    bb.go_batch()
