@@ -117,7 +117,7 @@ if __name__ == '__main__':
         df = multiproc(fis, params, load_multi, nproc=8)
     else:
         if '.csv' in fileName:
-            fis = df.read_csv(fileName)['fileName'].to_list()
+            fis = pd.read_csv(fileName)['fileName'].to_list()
             params = {}
             params['type_data'] = type_data
             params['input_dir'] = input_dir
