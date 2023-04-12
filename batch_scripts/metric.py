@@ -69,7 +69,7 @@ for fi in fis:
             df = pd.DataFrame(vv.tolist(), columns=['fileName'])
             df.to_csv(csvName, index=False)
             pp['fileName'] = csvName
-            pp['outName'] = '{}_i'.format(params['outName'])
+            pp['outName'] = '{}_{}'.format(params['outName'], i)
             bb.add_batch(thescript, pp)
     else:
         bb.add_batch(thescript, params)
