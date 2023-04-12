@@ -2,6 +2,9 @@ from optparse import OptionParser
 from ztf_pipeutils.ztf_util import checkDir
 from ztf_pipeutils.ztf_batch import BatchIt
 import glob
+from copy import deepcopy
+import numpy as np
+import pandas as pd
 
 parser = OptionParser()
 
@@ -49,5 +52,25 @@ for fi in fis:
     params['type_data'] = type_data
     if metric_name == 'RedMagMetric':
         params['fileName'] = 'all'
-    bb.add_batch(thescript, params)
-    bb.go_batch()
+        pp = deepcopy(params)
+        fis = glob.glob('{}/meta_fit*.hdf5'.format(input_dir))
+        fis = list(map(lambda x: x.split('/')[-1], fis))
+
+        print(len(fis))
+        arr = np.array(fis)
+        print(arr, arr.shape)
+        spl = np.array_split(arr, 10)
+        print(spl)
+
+        for i, vv in enumerate(spl):
+            inputFile_dir = 'input_{}'.format(metric_name)
+            checkDir(inputFile_dir)
+            csvName = '{}/{}_{}.csv'.format(inputFile_dir, procName, i)
+            df = pd.DataFrame(vv.tolist(), columns=['fileName'])
+            df.to_csv(csvName, index=False)
+            pp['fileName'] = csvName
+            pp['outName'] = '{}_i'.format(params['outName'])
+            bb.add_batch(thescript, pp)
+    else:
+        bb.add_batch(thescript, params)
+    # bb.go_batch()

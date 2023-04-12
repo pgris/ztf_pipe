@@ -116,7 +116,14 @@ if __name__ == '__main__':
         params['input_dir'] = input_dir
         df = multiproc(fis, params, load_multi, nproc=8)
     else:
-        df = get_data(type_data, input_dir, fileName)
+        if '.csv' in fileName:
+            fis = df.read_csv(fileName)['fileName'].to_list()
+            params = {}
+            params['type_data'] = type_data
+            params['input_dir'] = input_dir
+            df = multiproc(fis, params, load_multi, nproc=8)
+        else:
+            df = get_data(type_data, input_dir, fileName)
 
     df['healpixID'] = df['healpixID'].astype(str)
 
