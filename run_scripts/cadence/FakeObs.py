@@ -54,7 +54,7 @@ skynoise_g = opts.skynoise_g
 skynoise_r = opts.skynoise_r
 skynoise_i = opts.skynoise_i
 
-zp_g = opts.zp_g 
+zp_g = opts.zp_g
 zp_r = opts.zp_r
 zp_i = opts.zp_i
 
@@ -77,7 +77,8 @@ print(df)
 
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
-    df.to_hdf('{}/{}'.format(output_dir, filename), key='fake_data', mode='w')  
-else:
-    df.to_hdf('{}/{}'.format(output_dir, filename), key='fake_data', mode='w')  
 
+name_hdf5 = '{}/{}'.format(output_dir, filename)
+df.to_hdf(name_hdf5, key='fake_data', mode='w')
+name_csv = name_hdf5.replace('.hdf5', '.csv')
+df.to_csv(name_csv, index=False)

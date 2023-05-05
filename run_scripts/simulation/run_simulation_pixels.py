@@ -227,6 +227,7 @@ def lcPixel(selcad, obsData, simlc):
     seldata['healpixID'] = hpix
     seldata = seldata.groupby(
         ['night', 'band', 'field', 'rcid']).mean().reset_index()
+
     if len(seldata) > 5:
         lc = simlc(seldata, ra_range, dec_range)
 
@@ -344,9 +345,6 @@ cadData = loadData(opts.cadDir, opts.cadFile)
 # load observations
 obsData = loadData(opts.obsDir, opts.obsFile)
 
-# print(cadData)
-# print(obsData)
-
 params['obsData'] = obsData
 
 # select pixels/season with minimal season length and max E(B-V)
@@ -396,3 +394,5 @@ if __name__ == '__main__':
         if not backup_on_the_fly:
             # write LC and metadata
             write_LC_Meta(outputDir, lcName, metaName, path_prefix, lc_dict)
+
+print('Simu done')

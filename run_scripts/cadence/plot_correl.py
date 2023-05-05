@@ -3,6 +3,7 @@ from ztf_metrics import plt
 from ztf_metrics.plotUtils import loadData, binnedData
 import numpy as np
 import pandas as pd
+import glob
 
 parser = OptionParser()
 
@@ -17,17 +18,33 @@ cadenceDir = opts.cadenceDir
 zcompDir = opts.zcompleteDir
 
 cadenceData = loadData(cadenceDir)
-zcompData = loadData(zcompDir)
+
+dirs = glob.glob('{}/*'.format(zcompDir))
+zcompData = pd.DataFrame()
+for dd in dirs:
+    df = loadData(dd)
+    zcompData = pd.concat((zcompData, df))
 print(cadenceData)
 print(zcompData)
+
 
 dataCorr = zcompData.merge(cadenceData, left_on=['healpixID', 'season'],
                            right_on=['healpixID', 'season'])
 
-idx = dataCorr['zlim'] > 0.
-idx &= dataCorr['cad_all'] <= 5.
-dataCorr = dataCorr[idx]
+hpix = 103467
+ida = cadenceData['healpixID'] == hpix
+print(cadenceData[ida][['healpixRA', 'healpixDec', 'cad_all']])
+idb = zcompData['healpixID'] == hpix
+print(zcompData[idb]['zlim'])
+print(test)
+
+
 print(dataCorr.columns)
+idx = dataCorr['zlim'] > 0.
+# idx &= dataCorr['cad_all'] <= 5.
+# idx &= dataCorr['ebvofMW_x'] < 0.025
+dataCorr = dataCorr[idx]
+print(dataCorr['season'].unique())
 
 
 io = dataCorr['nb_obs_ztfi'] < 1
@@ -50,7 +67,7 @@ ax.plot(bbb['cad_all'], bbb['zlim'], color='k',
 ax.fill_between(bbb['cad_all'], bbb['zlim']+bbb['zlim_std'],
                 bbb['zlim']-bbb['zlim_std'], color='yellow', alpha=0.5)
 ax.grid()
-ax.set_xlim([0.9, 4])
+# ax.set_xlim([0.9, 4])
 ax.set_xlabel('cadence [days]')
 ax.set_ylabel('<$z_{complete}$>')
 ax.legend(frameon=False)
