@@ -1,9 +1,12 @@
 # info name, data col to select,value of selection, type of value, operator
-name,col,thresh,type,op
-n_phase_neg,phase,0,int,operator.le
-n_phase_pos,phase,0,int,operator.ge
-n_phase_min,phase,-10,int,operator.le
-n_phase_max,phase,20,int,operator.ge
-n_r_band,band,ztfr,str,operator.eq
-n_g_band,band,ztfg,str,operator.eq
-n_i_band,band,ztfi,str,operator.eq
+name,col,colsel,typesel,thresha,opa,threshb,opb,
+#n_phase_neg,phase,phase,int,0,operator.le,-10,operator.ge
+#n_phase_pos,phase,phase,int,0,operator.ge,0,operator.ge
+#n_phase_min,phase,phase,int,-10,operator.le,-10,operator.le
+#n_phase_max,phase,phase,int,20,operator.ge,20,operator.ge
+#n_r_band,band,band,str,ztfr,operator.eq,ztfr,operator.eq
+#n_g_band,band,band,str,ztfg,operator.eq,ztfg,operator.eq
+#n_i_band,band,band,str,ztfi,operator.eq,ztfi,operator.eq
+n_epochs_m10_p35,night,phase,int,-10,operator.ge,35,operator.le
+n_epochs_m10_p5,night,phase,int,-10,operator.ge,5,operator.le
+n_epochs_p5_p20,night,phase,int,5,operator.ge,20,operator.le

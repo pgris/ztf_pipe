@@ -1,9 +1,12 @@
 # threshold val, selec name, operator, type(threshold)
 thresh,name,op,type
-4,n_phase_neg,operator.ge,int
-10,n_phase_pos,operator.ge,int
-1,n_phase_min,operator.ge,int
-1,n_phase_max,operator.ge,int
-0,n_r_band,operator.ge,int
-0,n_g_band,operator.ge,int
-0,n_i_band,operator.ge,int
+#4,n_phase_neg,operator.ge,int
+#10,n_phase_pos,operator.ge,int
+#1,n_phase_min,operator.ge,int
+#1,n_phase_max,operator.ge,int
+#0,n_r_band,operator.ge,int
+#0,n_g_band,operator.ge,int
+#0,n_i_band,operator.ge,int
+4,n_epochs_m10_p35,operator.ge,int
+1,n_epochs_m10_p5,operator.ge,int
+1,n_epochs_p5_p20,operator.ge,int
