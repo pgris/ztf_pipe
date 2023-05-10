@@ -10,3 +10,4 @@ thresh,name,op,type
 4,n_epochs_m10_p35,operator.ge,int
 1,n_epochs_m10_p5,operator.ge,int
 1,n_epochs_p5_p20,operator.ge,int
+2,n_bands_m8_p10,operator.ge,int

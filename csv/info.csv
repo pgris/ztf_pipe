@@ -10,3 +10,4 @@ name,col,colsel,typesel,thresha,opa,threshb,opb,
 n_epochs_m10_p35,night,phase,int,-10,operator.ge,35,operator.le
 n_epochs_m10_p5,night,phase,int,-10,operator.ge,5,operator.le
 n_epochs_p5_p20,night,phase,int,5,operator.ge,20,operator.le
+n_bands_m8_p10,band,phase,int,-8,operator.ge,10,operator.le
