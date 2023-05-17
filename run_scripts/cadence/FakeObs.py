@@ -13,6 +13,13 @@ parser.add_option('--cad_r', type=int, default=2,
 parser.add_option('--cad_i', type=int, default=4,
                   help='cadence for the infrared band [%default]')
 
+parser.add_option('--N_g', type=int, default=1,
+                  help='Number of visits per night (g band) [%default]')
+parser.add_option('--N_r', type=int, default=1,
+                  help='Number of visits per night (r band) [%default]')
+parser.add_option('--N_i', type=int, default=1,
+                  help='Number of visits per night (i band) [%default]')
+
 parser.add_option('--skynoise_g', type=int, default=30.692339655985883,
                   help='skynoise for green band [%default]')
 parser.add_option('--skynoise_r', type=int, default=35.56558820077846,
@@ -49,6 +56,8 @@ opts, args = parser.parse_args()
 cad_g = opts.cad_g
 cad_r = opts.cad_r
 cad_i = opts.cad_i
+
+
 
 skynoise_g = opts.skynoise_g
 skynoise_r = opts.skynoise_r
